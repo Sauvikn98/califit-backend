@@ -15,9 +15,11 @@ const razorpay = new Razorpay({
 
 router.post('/create-order', async (req, res) => {
   try {
-    const { athleteId, amount } = req.body;
+    const { athleteId, amount, categories } = req.body; // Include categories in the request body
+
+    // Create a Razorpay order
     const order = await razorpay.orders.create({
-      amount: amount * 100, // Convert to smallest currency unit
+      amount: amount * 100, // Convert to the smallest currency unit (paise for INR)
       currency: 'INR',
       receipt: `receipt_${athleteId}_${Date.now()}`,
     });
@@ -31,6 +33,7 @@ router.post('/create-order', async (req, res) => {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
+      categories, // Save associated categories
     });
 
     await payment.save();
@@ -41,17 +44,18 @@ router.post('/create-order', async (req, res) => {
   }
 });
 
+
 router.post('/verify-payment', async (req, res) => {
   try {
     const { orderId, paymentId, signature } = req.body;
 
-    // Retrieve the payment record
-    const payment = await Payment.findOne({ orderId });
+    // Retrieve the payment record and populate categories for clarity
+    const payment = await Payment.findOne({ orderId }).populate('categories');
     if (!payment) {
       return res.status(404).json({ message: 'Payment record not found' });
     }
 
-    // Verify signature
+    // Verify the Razorpay signature
     const generatedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
       .update(`${orderId}|${paymentId}`)
@@ -61,7 +65,7 @@ router.post('/verify-payment', async (req, res) => {
       return res.status(400).json({ message: 'Payment verification failed' });
     }
 
-    // Update payment status
+    // Update payment status and save
     payment.paymentId = paymentId;
     payment.signature = signature;
     payment.status = 'successful';
@@ -69,10 +73,11 @@ router.post('/verify-payment', async (req, res) => {
 
     await payment.save();
 
-    res.status(200).json({ message: 'Payment verified successfully' });
+    res.status(200).json({ message: 'Payment verified successfully', payment });
   } catch (error) {
     res.status(500).json({ message: 'Error verifying payment', error });
   }
 });
+
 
 module.exports = router;

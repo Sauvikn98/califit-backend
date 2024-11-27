@@ -7,6 +7,12 @@ const PaymentSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   currency: { type: String, required: true },
   status: { type: String, enum: ['created', 'successful', 'failed', 'pending'], default: 'created' },
+  categories: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'EventCategory',
+    },
+  ], // Allow referencing multiple categories
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
