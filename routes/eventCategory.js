@@ -108,4 +108,27 @@ router.delete('/delete/:id', async (req, res) => {
   }
 });
 
+router.post('/by-ids', async (req, res) => {
+  try {
+    const { ids } = req.body; // Expecting an array of category IDs
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'IDs array is required and cannot be empty.' });
+    }
+
+    // Fetch categories by the provided IDs
+    const categories = await EventCategory.find({
+      '_id': { $in: ids }  // MongoDB query to find documents with _id in the given array
+    });
+
+    if (categories.length === 0) {
+      return res.status(404).json({ message: 'No categories found for the provided IDs.' });
+    }
+
+    res.status(200).json({ categories });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching categories by IDs', error });
+  }
+});
+
 module.exports = router;

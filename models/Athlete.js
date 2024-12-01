@@ -7,6 +7,7 @@ const AthleteSchema = new mongoose.Schema({
     dob: { type: Date, required: true },
     gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true },
     nationality: { type: String, required: true },
+    lodging: { type: Boolean, required: true }
   },
   contactInformation: {
     phoneNumber: { type: String, required: true },
@@ -15,9 +16,11 @@ const AthleteSchema = new mongoose.Schema({
     emergencyContactNumber: { type: String, required: true },
     relationshipWithEmergencyContact: { type: String, required: true },
   },
-  eventCategory: {
-    mainSportCategory: [{ type: String, enum: ['Statics', 'Freestyle', 'Endurance Beginner', 'Endurance advanced', 'Streetlifting'], required: true }],
-  },
+  eventCategory: [{
+    type: mongoose.Schema.Types.ObjectId,  // An array of references to EventCategory
+    ref: 'EventCategory',  // The model to reference
+    required: true,
+  }],
   previousExperience: {
     participatedBefore: { type: Boolean, required: true },
     yearsOfExperience: { type: String },
