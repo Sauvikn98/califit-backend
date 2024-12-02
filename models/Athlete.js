@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const AthleteSchema = new mongoose.Schema({
   basicInformation: {
     fullName: { type: String, required: true },
-    nickname: { type: String },
+    stageName: { type: String },
+    instagramHandle: {type: String},
     dob: { type: Date, required: true },
     gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true },
     nationality: { type: String, required: true },
-    lodging: { type: Boolean, required: true }
   },
   contactInformation: {
     phoneNumber: { type: String, required: true },
@@ -34,6 +34,7 @@ const AthleteSchema = new mongoose.Schema({
   },
   jerseyAndFood: {
     jerseySize: { type: String, enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], required: true },
+    lodging: { type: Boolean, required: true }
   },
   agreements: {
     waiverAgreement: { type: Boolean, required: true },
